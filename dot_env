@@ -1,0 +1,3 @@
+CLIENT_ID='123'
+CLIENT_SECRET='somesecret'
+CONTENT_URL='https://carli.libguides.com/ld.php?content_id='
