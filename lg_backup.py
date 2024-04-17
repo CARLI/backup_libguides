@@ -74,7 +74,7 @@ try:
     if not os.path.exists(guide_json_filename):
       with open(f"{guide_json_filename}", "w") as guide_json:
         print('downloading guide:', guide_json_filename)
-        guide_json.write(json.dumps(guide))
+        guide_json.write(json.dumps(guide, indent=4))
     # only published (status=1) or private (status=2 )pages are accessible
     if guide['status'] == 1 or guide['status'] == 2:
       for page in guide['pages']:
@@ -113,7 +113,7 @@ try:
           if not os.path.exists(asset_filename):
             print("\t\t" + 'downloading asset:', asset_filename)
             with open(f"{asset_filename}", "w") as asset_json:
-              asset_json.write(json.dumps(asset))
+              asset_json.write(json.dumps(asset, indent=4))
           asset_doc_filename = f"{asset_dir}/{asset['meta']['file_name']}"
           if not os.path.exists(asset_doc_filename):
             html_response = requests_session.get(f"{CONTENT_URL}{asset['id']}")
