@@ -70,17 +70,13 @@ try:
     guide_dir = f"./data/guide/{guide['id']}/{guide['updated']}"
     if not os.path.exists(guide_dir):
       os.makedirs(guide_dir)
-    with open(f"{guide_dir}/guide.json", "w") as guide_json:
-      guide_json.write(json.dumps(guide))
-    # only published (status == 1) pages are accessible
-    if guide['status'] == 1:
-      guide_filename = f"{guide_dir}/guide.html"
-      if not os.path.exists(guide_filename):
-        html_response = requests_session.get(guide['url'])
-        with open(guide_filename, "w") as guide_html:
-          print('downloading guide:', guide_filename)
-          guide_html.write(html_response.text)
-          slurp_images(guide_dir, html_response.text)
+    guide_json_filename = f"{guide_dir}/guide.json"
+    if not os.path.exists(guide_json_filename):
+      with open(f"{guide_json_filename}", "w") as guide_json:
+        print('downloading guide:', guide_json_filename)
+        guide_json.write(json.dumps(guide))
+    # only published (status=1) or private (status=2 )pages are accessible
+    if guide['status'] == 1 or guide['status'] == 2:
       for page in guide['pages']:
         page_dir = f"{guide_dir}/page/{page['id']}/{page['updated']}"
         if not os.path.exists(page_dir):
@@ -92,7 +88,7 @@ try:
             print("\t" + 'downloading page:', page_filename)
             page_html.write(html_response.text)
             slurp_images(page_dir, html_response.text)
-      # download "Document / File" (type_id=4) assets within this guide
+      # download assets within this guide (similar to slurping images)
       asset_response = requests_session.get('https://lgapi-us.libapps.com/1.2/assets',
         headers={
           'Content-Type': 'application/json',
@@ -104,13 +100,13 @@ try:
         }
       )
       for asset in asset_response.json():
+        ###print(asset)
+        ###print('url', asset['url']) 
+        ###print('created', asset['created'])
+        ###print('updated', asset['updated'])
+        ###print()
         if asset['type_id'] == 4:
-          ###print(asset)
-          ###print('url', asset['url']) 
-          ###print('created', asset['created'])
-          ###print('updated', asset['updated'])
-          ###print()
-          asset_dir = f"{guide_dir}/asset/{asset['id']}/{asset['updated']}"
+          asset_dir = f"./data/guide/{guide['id']}/asset/{asset['id']}/{asset['updated']}"
           if not os.path.exists(asset_dir):
             os.makedirs(asset_dir)
           asset_filename = f"{asset_dir}/asset.json"
@@ -118,44 +114,12 @@ try:
             print("\t\t" + 'downloading asset:', asset_filename)
             with open(f"{asset_filename}", "w") as asset_json:
               asset_json.write(json.dumps(asset))
-            asset_doc_filename = f"{asset_dir}/{asset['meta']['file_name']}"
-            if not os.path.exists(asset_doc_filename):
-              html_response = requests_session.get(f"{CONTENT_URL}{asset['id']}")
-              with open(asset_doc_filename, "wb") as asset_document:
-                print("\t\t\t" + 'downloading asset file:', asset_doc_filename)
-                asset_document.write(html_response.content)
-
-  # list all assets separately
-  response = requests_session.get('https://lgapi-us.libapps.com/1.2/assets',
-    headers={
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + ACCESS_TOKEN,
-    },
-    params={
-      'expand': 'subjects,icons,friendly_url'
-    }
-  )
-  for asset in response.json():
-    ###print(asset)
-    ###print('url', asset['url']) 
-    ###print('created', asset['created'])
-    ###print('updated', asset['updated'])
-    ###print()
-    asset_dir = f"./data/asset/{asset['id']}/{asset['updated']}"
-    if not os.path.exists(asset_dir):
-      os.makedirs(asset_dir)
-    asset_filename = f"{asset_dir}/asset.json"
-    if not os.path.exists(asset_filename):
-      with open(f"{asset_filename}", "w") as asset_json:
-        print('downloading asset:', asset_filename)
-        asset_json.write(json.dumps(asset))
-      if asset['type_id'] == 4:
-        asset_doc_filename = f"{asset_dir}/{asset['meta']['file_name']}"
-        if not os.path.exists(asset_doc_filename):
-          html_response = requests_session.get(f"{CONTENT_URL}{asset['id']}")
-          with open(asset_doc_filename, "wb") as asset_document:
-            print("\t" + 'downloading asset file:', asset_doc_filename)
-            asset_document.write(html_response.content)
+          asset_doc_filename = f"{asset_dir}/{asset['meta']['file_name']}"
+          if not os.path.exists(asset_doc_filename):
+            html_response = requests_session.get(f"{CONTENT_URL}{asset['id']}")
+            with open(asset_doc_filename, "wb") as asset_document:
+              print("\t\t\t" + 'downloading asset file:', asset_doc_filename)
+              asset_document.write(html_response.content)
 
   print(f"Operation took {time.time() - before} seconds")
 
