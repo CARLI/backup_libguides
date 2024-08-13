@@ -54,6 +54,7 @@ def slurp_images(parent_dir, date_str, page):
       os.makedirs(image_dir)
 
     html_response = requests_session.get(url_str)
+    print("\t\t\t" + 'downloaded image: ' + url_str + ' (status: ' + str(html_response.status_code) + ')')
     file_like = BytesIO(html_response.content)
     hash_value = file_hash(file_like)
 
@@ -102,6 +103,8 @@ try:
       with open(f"{guide_json_filename}", "w") as guide_json:
         print('downloading guide:', guide_json_filename)
         guide_json.write(json.dumps(guide, indent=4))
+    else:
+      print('unchanged guide:', guide_json_filename)
     # only published (status=1) or private (status=2 )pages are accessible
     if guide['status'] == 1 or guide['status'] == 2:
       for page in guide['pages']:
