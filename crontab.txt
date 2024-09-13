@@ -1,0 +1,2 @@
+#--------  Daily backup of libguides data
+06 12 * * * alma /home/carli/scripts/backup_libguides/backup_lg.sh
